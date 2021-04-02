@@ -22,4 +22,4 @@ client.on('message', msg => {
 // You really don't want your token here since your repl's code
 // is publically available. We'll take advantage of a Repl.it 
 // feature to hide the token we got earlier. 
-client.login(process.env.DISCORD_TOKEN);
+client.login('ODI3MjE4NTg4MDI4ODk1Mjcy.YGX1WA.kfWzEAWbnYoUIK3_UGCjLkVzxDc');
