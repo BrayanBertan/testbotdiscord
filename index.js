@@ -24,6 +24,10 @@ client.on('message', msg => {
     setTimeout(teste, 3000);
   
   }
+  if (msg.content === 'test') {
+    setTimeout(teste, 5000);
+  
+  }
 });
 // You really don't want your token here since your repl's code
 // is publically available. We'll take advantage of a Repl.it 
