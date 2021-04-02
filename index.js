@@ -22,7 +22,6 @@ client.on('ready', () => {
 
 client.on('message', msg => {
   async  function createMain(nick){
-   // msg.reply('pong!'+a);
    await prisma.user.create({
     data:{
       nick:nick
@@ -30,17 +29,25 @@ client.on('message', msg => {
   });
   }
 
-  var contentArray = msg.content.split(' ');
+  async function getAllAlts(){
+    const allUsers = await prisma.user.findMany({
+      include: {
+      alts:true
+      },
+    });
+   return allUsers;
+  }
+
+  var contentArray = msg.content.trim().split(' ');
   var command = contentArray[0];
+  if(contentArray.length == 1) return msg.reply('Invalid Command! missing params!');
 
   if (command === 'create') {
-    console.log(contentArray[1]);
-    createMain(contentArray[1]);
-     console.log('done');
+    createMain(contentArray[1].toUpperCase());
+    msg.reply('Main '+ contentArray[1]+' created!');
   }
-  if (msg.content === 'test') {
-    setTimeout(teste, 5000);
-  
+  if (command === 'get') {
+    msg.reply(getAllAlts());
   }
 });
 
