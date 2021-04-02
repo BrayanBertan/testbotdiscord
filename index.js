@@ -51,6 +51,13 @@ client.on('message', msg => {
    });
    }
 
+   async function setManyAlts(nicks){
+    const createMany = await prisma.alt.createMany({
+      data: nicks,
+      skipDuplicates: true,
+    })
+   }
+
   var contentArray = msg.content.trim().split(' ');
   var command = contentArray[0];
   if(contentArray.length == 1) return msg.reply('Invalid Command! missing params!');
@@ -79,13 +86,24 @@ client.on('message', msg => {
     var param2 = contentArray[2].toUpperCase();
     getAlts(param1).then(function(value) {
       if(value == null) return msg.reply(param1+' doesnt exists!');
-      setAlt(value.id,param2).then(function(value){
-        msg.reply('Alt '+param2+ ' created for Main '+ param1);
-      },
-      function(error){
-        msg.reply('Error');
-      });
-     
+      var altsArray = param2.trim().split(',');
+      if(altsArray.length == 1){
+        setAlt(value.id,param2).then(function(value){
+          msg.reply('Alt '+param2+ ' created for Main '+ param1);
+        },
+        function(error){
+          msg.reply('Error');
+        });
+      }else{
+        var allAlts = [];
+        altsArray.forEach(item => allAlts.push({nick:item, mainId:value.id}));
+        setManyAlts(allAlts).then(function(value){
+          msg.reply('Alts '+altsArray+ ' created for Main '+ param1);
+        },
+        function(error){
+          msg.reply('Error');
+        });
+      }
      }, function(error) {
       msg.reply('Error');
      });
