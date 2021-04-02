@@ -15,8 +15,14 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
+  var a = 0;
+  function teste(){
+    msg.reply('pong!'+a);
+    a++;
+  }
   if (msg.content === 'ping') {
-    msg.reply('pong!');
+    setTimeout(teste, 3000);
+  
   }
 });
 // You really don't want your token here since your repl's code
