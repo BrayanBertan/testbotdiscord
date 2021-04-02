@@ -1,7 +1,12 @@
+
+
 const express = require('express');
 const app = express();
 const port = 3000;
 
+
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 app.get('/', (req, res) => res.send('Hello World!'));
 
 app.listen(process.env.PORT || port, () => console.log(`Example app listening at http://localhost:${port}`));
@@ -13,6 +18,19 @@ const client = new Discord.Client();
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
+
+async function main() {
+  const allUsers = await prisma.user.findMany()
+  console.log(allUsers)
+}
+main()
+  .catch(e => {
+    throw e
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
+
 
 client.on('message', msg => {
   var a = 0;
