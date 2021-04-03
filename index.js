@@ -22,6 +22,8 @@ client.on('ready', () => {
 
 client.on('message', msg => {
 
+
+
   async  function createMain(nick){
    await prisma.user.create({
     data:{
@@ -95,6 +97,7 @@ client.on('message', msg => {
 
   var contentArray = msg.content.trim().split(' ');
   var command = contentArray[0];
+  if(command != 'create' && command != 'get' &&  command != 'set' &&  command != 'unset' &&   command != 'delete' ) return;
   if(contentArray.length == 1) return msg.reply('Invalid Command! missing params!');
   var param1 = contentArray[1].toUpperCase();
 
