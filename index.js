@@ -31,15 +31,7 @@ client.on('message', msg => {
   }
 
 
-  async function deleteAlt(nick){
-    const deleteUser = await prisma.alt.delete({
-      where: {
-        nick: 'nick',
-      },
-    })
-  }
-
-  async function getMainId(nick){
+  async function getMainData(nick){
     const mainId = await prisma.user.findFirst({
       where:{
           nick:nick,
@@ -76,13 +68,38 @@ client.on('message', msg => {
     })
    }
 
+   async function unsetAlt(nick){
+    const unsetedAlt = await prisma.alt.deleteMany({
+      where: {
+      nick: nick,
+      },
+    })
+    return unsetedAlt;
+   }
+
+   async function deleteUser(main){
+  
+    const deletedAlts =  prisma.alt.deleteMany({
+      where: {
+        mainId: main.id,
+      },
+    })
+    const deletedUser = prisma.user.delete({
+      where: {
+        id: main.id,
+      },
+    })
+    const transaction =  prisma.$transaction([deletedAlts, deletedUser])
+    return transaction;
+   }
+
   var contentArray = msg.content.trim().split(' ');
   var command = contentArray[0];
   if(contentArray.length == 1) return msg.reply('Invalid Command! missing params!');
   var param1 = contentArray[1].toUpperCase();
 
   if (command === 'create') {
-    getMainId(param1).then(function(main){
+    getMainData(param1).then(function(main){
       if(main != null) return msg.reply('Main already registered!');
       createMain(param1).then(function(value){
         msg.reply('Main '+ param1+' created!');
@@ -108,39 +125,36 @@ client.on('message', msg => {
     });
   }
 
-  if (command === 'teest') {
-    if(contentArray.length < 3) return msg.reply('Invalid Command! missing params!');
-    var param2 = contentArray[2].toUpperCase();
-    getAlts(param1).then(function(value) {
-      if(value == null) return msg.reply(param1+' doesnt exists!');
-      var altsArray = param2.trim().split(',');
-      if(altsArray.length == 1){
-        setAlt(value.id,param2).then(function(value){
-          msg.reply('Alt '+param2+ ' created for Main '+ param1);
-        },
-        function(error){
-          msg.reply('Error');
-        });
-      }else{
-        var allAlts = [];
-        altsArray.forEach(item => allAlts.push({nick:item, mainId:value.id}));
-        setManyAlts(allAlts).then(function(value){
-          msg.reply('Alts '+altsArray+ ' created for Main '+ param1);
-        },
-        function(error){
-          msg.reply('Error');
-        });
-      }
+  if(command === 'unset'){
+    unsetAlt(param1).then(function(alt) {
+      msg.reply(param1+' alt deleted');
      }, function(error) {
-      msg.reply('Error');
+       msg.reply('Error unsetAlt');
+       console.log(error);
      });
+  }
+
+  if(command === 'delete'){
+    getMainData(param1).then(function(main){
+      if(main == null) return msg.reply(param1+' doesnt exists!');
+        deleteUser(main).then(function(value) {
+        msg.reply(param1+' and ALL alts deleted');
+      }, function(error) {
+        msg.reply('Error deleteUser');
+        console.log(error);
+      });
+      },
+    function(error){
+      msg.reply('Error getMainData');
+      console.log(error);
+    });
   }
 
   
   if(command === 'set'){
     if(contentArray.length < 3) return msg.reply('Invalid Command! missing params!');
       var param2 = contentArray[2].toUpperCase();
-    getMainId(param1).then(function(main){
+    getMainData(param1).then(function(main){
       if(main == null) return msg.reply(param1+' doesnt exists!');
       var altsArray = param2.trim().split(',');
       if(altsArray.length == 1){
@@ -163,7 +177,7 @@ client.on('message', msg => {
       
     },
     function(error){
-      msg.reply('Error getMainId');
+      msg.reply('Error getMainData');
     });
   }
 });
